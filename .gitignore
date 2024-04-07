@@ -24,5 +24,4 @@ build/
 dist/
 *.egg-info/
 
-requirements.txt
 Pipfile.lock
