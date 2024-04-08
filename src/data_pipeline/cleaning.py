@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 from src.middleware import error_handler
 
 
@@ -19,7 +20,7 @@ def clean_rentals_data(data):
     cleaned_data = cleaned_data.dropna(subset=['rent', 'deposit', 'additionalCostsRaw'], how='any')
 
     # Remove unnecessary columns
-    unnecessary_columns = ['_id', 'crawlStatus', 'crawledAt', 'detailsCrawledAt', 'firstSeenAt', 'lastSeenAt', 'pageDescription', 'pageTitle', 'source']
+    unnecessary_columns = ['crawlStatus', 'firstSeenAt', 'detailsCrawledAt', 'lastSeenAt', 'pageTitle']
     cleaned_data = cleaned_data.drop(columns=unnecessary_columns)
 
     # Remove leading and trailing whitespaces from string columns
@@ -28,7 +29,6 @@ def clean_rentals_data(data):
 
     # Preprocess data
     cleaned_data = preprocess_data(cleaned_data)
-
     return cleaned_data
 
 
@@ -50,21 +50,27 @@ def clean_airbnb_data(data):
 @error_handler.handle_error
 def preprocess_data(data):
     for col in data.columns:
-        # Check if the column is of object (string) type
         if data[col].dtype == 'O':
-            # Apply string cleaning operations to each string column
-            data[col] = data[col].str.replace('\\u2019', "'") \
-                .str.replace('\u20ac ', '€') \
-                .str.replace(' /', ',') \
-                .str.replace('/', ', ') \
-                .str.replace('\\u20ac ', '€') \
-                .str.replace('\"', '') \
-                .str.replace('\t', '') \
-                .str.replace("-'", "-") \
-                .str.replace('-', '€0') \
-                .str.strip()
+            if col in ['additionalCostsRaw', 'registrationCost', 'deposit']:
+                data[col] = data[col].str.replace(r'\u20ac', '€', regex=True)
+                data[col] = data[col].str.replace(r'\'', "'", regex=True)
+                data[col] = data[col].str.replace(r'\\u2019', "'", regex=True)
+                data[col] = data[col].str.replace('-', '€ 00', regex=False)
+                data[col] = data[col].str.replace("€ 0'", "€ 0.00'")
+                data[col] = data[col].str.replace(r'\b(\d+)\b(?!\.|(\.\d{1,2}))', r'\1.00', regex=True)
+            elif col == 'availability':
+                data[col] = data[col].str.replace(r"'(\d+)", r"\1", regex=True)
+            elif col in ['descriptionTranslated', 'energyLabel']:
+                data[col] = data[col].fillna('Unknown')
+                data[col] = data[col].replace('', 'Unknown')
+                data[col] = data[col].replace('.', 'Unknown')
+            else:
+                # Apply default transformation if no specific transformation is needed
+                data[col] = data[col].str.replace(' /', ',', regex=False)
+                data[col] = data[col].str.replace('/', ', ', regex=False)
+                data[col] = data[col].str.replace('\"', '', regex=False)
+                data[col] = data[col].str.replace('\t', '', regex=False)
+                data[col] = data[col].str.strip()
 
     print("Preprocessing completed successfully.")
     return data
-
-

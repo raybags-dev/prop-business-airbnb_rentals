@@ -1,11 +1,10 @@
 import os
 import json
 from pathlib import Path
+from typing import Union
 from src.data_pipeline import ingestion, cleaning
-from src.utils.loader import worker_emulator
 from src.middleware import error_handler
 from src.utils.geoLocator import assign_zipcode
-
 
 # Define file paths using Path objects
 rentalsJSONFilePath = Path('../data/rentals.json')
@@ -26,47 +25,59 @@ def data_processor_pipeline() -> bool:
     cleaned_rentals_dict = cleaned_rentals_data.to_dict(orient='records')
     cleaned_airbnb_dict = cleaned_airbnb_data.to_dict(orient='records')
 
-    # fetch missing zipcodes
-    cleaned_airbnb_dict = assign_zipcode(cleaned_airbnb_dict)
-
     # Write cleaned data to JSON files
-    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict)
+    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict, 'full')
 
 
 @error_handler.handle_error
-def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth=None):
+def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[str, int] = 'full'):
     is_completed = True
 
     # Create a new directory for cleaned data if it doesn't exist
     cleaned_data_dir = Path('data/data_cleaned')
     cleaned_data_dir.mkdir(parents=True, exist_ok=True)
 
-    # Define file paths for JSON files
-    # rentals_json_file_path = cleaned_data_dir / 'cleaned_rentals_data.json'
-    # airbnb_json_file_path = cleaned_data_dir / 'cleaned_airbnb_data.json'
-
-    # Define file paths for text files
+    # File paths for .json  or .txt files
+    rentals_json_file_path = cleaned_data_dir / 'cleaned_rentals_data.json'
+    airbnb_json_file_path = cleaned_data_dir / 'cleaned_airbnb_data.json'
     rentals_txt_file_path = cleaned_data_dir / 'cleaned_rentals_data.txt'
     airbnb_txt_file_path = cleaned_data_dir / 'cleaned_airbnb_data.txt'
 
-    worker_emulator('Writing data to file...', True)
-
     # Apply depth control
-    if depth is not None and isinstance(depth, int) and depth > 0:
+    if depth != 'full' and (isinstance(depth, int) and depth > 0):
         cleaned_rentals_data = cleaned_rentals_data[:depth]
         cleaned_airbnb_data = cleaned_airbnb_data[:depth]
 
-    # Write cleaned rentals data to JSON file
-    # with open(rentals_json_file_path, 'w') as json_file:
-    #     json.dump(cleaned_rentals_data, json_file, indent=4)
-    #     print("Cleaned rentals data written to JSON file:", rentals_json_file_path)
-    #
-    # # Write cleaned airbnb data to JSON file
-    # with open(airbnb_json_file_path, 'w') as json_file:
-    #     json.dump(cleaned_airbnb_data, json_file, indent=4)
-    #     print("Cleaned airbnb data written to JSON file:", airbnb_json_file_path)
+        # Enriching airbnb objects data from reverse geo search Google API
+        assign_zipcode(cleaned_airbnb_data)
 
-    # Write cleaned rentals data to text file
+    # Write cleaned rentals or airbnb data to either .txt or .json file
+    json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
+    # txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+
+    count_objects(cleaned_rentals_data, 'Rentals')
+    count_objects(cleaned_airbnb_data, 'Airbnb')
+
+    writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airbnb_data)
+    return is_completed
+
+
+@error_handler.handle_error
+def json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data):
+    # Write cleaned rentals data to JSON file
+    with open(rentals_json_file_path, 'w') as json_file:
+        json.dump(cleaned_rentals_data, json_file, indent=4)
+    print("Cleaned rentals data written to JSON file:", rentals_json_file_path)
+
+    # Write cleaned airbnb data to .json file
+    with open(airbnb_json_file_path, 'w') as json_file:
+        json.dump(cleaned_airbnb_data, json_file, indent=4)
+    print("Cleaned airbnb data written to JSON file:", airbnb_json_file_path)
+
+
+@error_handler.handle_error
+def txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data):
+    # Write cleaned rentals data to .txt file
     with open(rentals_txt_file_path, 'w') as txt_file:
         for item in cleaned_rentals_data:
             txt_file.write(str(item) + '\n')
@@ -75,15 +86,6 @@ def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth=None):
     with open(airbnb_txt_file_path, 'w') as txt_file:
         for item in cleaned_airbnb_data:
             txt_file.write(str(item) + '\n')
-
-    # Count objects written to files
-    count_objects(cleaned_rentals_data, 'Rentals')
-    count_objects(cleaned_airbnb_data, 'Airbnb')
-
-    writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airbnb_data)
-    worker_emulator('Done', False)
-
-    return is_completed
 
 
 def count_objects(object_list, category):
@@ -126,4 +128,3 @@ def writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airb
         formatted_message = json.dumps(message, indent=4)
         print(formatted_message)
         return message
-

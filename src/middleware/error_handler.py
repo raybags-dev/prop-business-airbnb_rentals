@@ -6,7 +6,7 @@ def handle_error(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            print('An error occurred: ❌❌ ', e)
+            print('An error occurred: ❌ ', e)
             worker_emulator('Failed',False)
             return None
     return wrapper
