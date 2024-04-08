@@ -1,6 +1,7 @@
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
 from geopy.geocoders import Nominatim
+import re
 
 
 # Initialize geocoder with a custom user agent (optional)
@@ -24,14 +25,18 @@ def assign_zipcode(data):
     # Iterate over each object in the list
     for obj in data:
         # Check if zipcode is not empty or null before processing
-        if not obj['zipcode'] or obj['zipcode'] == '':
+        condition1 = obj['zipcode'] in ('', None, False) or not re.match(r'^\d{4}\s[A-Z]{2}$', obj['zipcode'])
+        condition2 = obj
+
+        if condition2:
+            print(obj['zipcode'])
             # Check cache first (optional)
             if (obj["latitude"], obj["longitude"]) in zipcode_cache:
                 zipcode = zipcode_cache[(obj["latitude"], obj["longitude"])]
                 obj['zipcode'] = zipcode
                 continue
 
-            print(f' -> Fetching zipcode for ({obj["latitude"]}, {obj["longitude"]})')
+            print(f' -> Fetching zipcode for (lat={obj["latitude"]}, lon={obj["longitude"]})')
 
             # Perform reverse geocoding
             location = reverse_geocode(obj['latitude'], obj['longitude'])
@@ -42,6 +47,11 @@ def assign_zipcode(data):
                 # Assign zipcode to the object and cache (optional)
                 obj['zipcode'] = zipcode
                 zipcode_cache[(obj["latitude"], obj["longitude"])] = zipcode
+
+                # Append other fields from the API call to the object
+                for key, value in location.raw['address'].items():
+                    if key != 'postcode':
+                        obj[key] = value
             else:
                 print(f"Failed to fetch zipcode for ({obj['latitude']}, {obj['longitude']})")
 
