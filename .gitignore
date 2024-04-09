@@ -1,5 +1,8 @@
 venv/
-
+data/airbnb.csv
+data/rentals.json
+data/airbnb.zip
+data/rentals.zip
 src/src/data/data_cleaned/cleaned_airbnb_data.txt
 src/src/data/data_cleaned/cleaned_rentals_data.txt
 src/src/data/data_cleaned/cleaned_airbnb_data.json
