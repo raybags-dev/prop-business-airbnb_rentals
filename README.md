@@ -15,7 +15,7 @@
 ## Installation and usage
 To run this project, follow these steps:
 1. Clone the repository:
-   git clone https://github.com/your_username/your_project.git
+   git clone https://github.com/raybags-dev/prop-business-airbnb_rentals.git
 2. Navigate to the project directory:
 3. Create a virtual environment:
 4. Activate the virtual environment:

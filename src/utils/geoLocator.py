@@ -1,8 +1,6 @@
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
 from geopy.geocoders import Nominatim
-import re
-
 
 # Initialize geocoder with a custom user agent (optional)
 geolocator = Nominatim(user_agent="my_custom_user_agent")
@@ -19,25 +17,27 @@ def reverse_geocode(latitude, longitude):
 
 
 @error_handler.handle_error
-def assign_zipcode(data):
+def assign_zipcode(data, clear_cache=False):
+    # Clear the cache if requested
+    if clear_cache:
+        zipcode_cache.clear()
+        print("Cache cleared.")
+
     worker_emulator('Fetching zipcodes...', True)
 
     # Iterate over each object in the list
     for obj in data:
+        # Check if the object's coordinates are in the cache
+        if (obj["latitude"], obj["longitude"]) in zipcode_cache:
+            # If so, retrieve the zipcode from the cache
+            zipcode = zipcode_cache[(obj["latitude"], obj["longitude"])]
+            obj['zipcode'] = zipcode
+            continue
+
         # Check if zipcode is not empty or null before processing
-        condition1 = obj['zipcode'] in ('', None, False) or not re.match(r'^\d{4}\s[A-Z]{2}$', obj['zipcode'])
-        condition2 = obj
-
-        if condition2:
-            print(obj['zipcode'])
-            # Check cache first (optional)
-            if (obj["latitude"], obj["longitude"]) in zipcode_cache:
-                zipcode = zipcode_cache[(obj["latitude"], obj["longitude"])]
-                obj['zipcode'] = zipcode
-                continue
-
+        # if obj['zipcode'] in ('', None, False) or not re.match(r'^\d{4}\s[A-Z]{2}$', obj['zipcode']):
+        if obj:
             print(f' -> Fetching zipcode for (lat={obj["latitude"]}, lon={obj["longitude"]})')
-
             # Perform reverse geocoding
             location = reverse_geocode(obj['latitude'], obj['longitude'])
 
@@ -60,3 +60,4 @@ def assign_zipcode(data):
 
     worker_emulator('Object ready', False)
     return data
+
