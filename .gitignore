@@ -1,6 +1,7 @@
 venv/
 data/
 src/data/
+src/data/zipped
 
 
 *.pyc
