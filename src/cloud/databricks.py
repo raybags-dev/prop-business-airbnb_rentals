@@ -1,10 +1,14 @@
+import os
 import subprocess
 from pathlib import Path
 from colorama import init
+from dotenv import load_dotenv
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
 
+
 init()
+load_dotenv()
 
 
 @error_handler.handle_error
@@ -12,10 +16,10 @@ def upload_files_to_databricks(is_data_ready: bool) -> None:
     if not is_data_ready:
         print("> Data is not ready. Skipping upload to Databricks.")
         return
+    databricks_workspace = os.environ.get("DATABRICKS_WORKSPACE")
 
     source_directory = Path('./data/data_cleaned/')
-    destination_directory = Path('/adb-2165640261815898.18.azuredatabricks.net/browse/folders/3694927554019636?o'
-                                 '=2165640261815898')
+    destination_directory = Path(f'/{databricks_workspace}')
 
     # List all files in the source directory
     files = source_directory.glob('*')
