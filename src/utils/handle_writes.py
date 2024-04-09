@@ -26,39 +26,49 @@ def data_processor_pipeline() -> bool:
     cleaned_airbnb_dict = cleaned_airbnb_data.to_dict(orient='records')
 
     # Write cleaned data to JSON files
-    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict, 'full')
+    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict, 10)
 
 
 @error_handler.handle_error
-def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[str, int] = 'full'):
+def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None, int] = None):
     is_completed = True
 
     # Create a new directory for cleaned data if it doesn't exist
     cleaned_data_dir = Path('data/data_cleaned')
     cleaned_data_dir.mkdir(parents=True, exist_ok=True)
 
-    # File paths for .json  or .txt files
+    # File paths for .json or .txt files
     rentals_json_file_path = cleaned_data_dir / 'cleaned_rentals_data.json'
     airbnb_json_file_path = cleaned_data_dir / 'cleaned_airbnb_data.json'
     rentals_txt_file_path = cleaned_data_dir / 'cleaned_rentals_data.txt'
     airbnb_txt_file_path = cleaned_data_dir / 'cleaned_airbnb_data.txt'
 
-    # Apply depth control
-    if depth != 'full' and (isinstance(depth, int) and depth > 0):
+    # Process objects up to the specified depth if applicable
+    if depth is not None and isinstance(depth, int) and depth > 0:
         cleaned_rentals_data = cleaned_rentals_data[:depth]
         cleaned_airbnb_data = cleaned_airbnb_data[:depth]
 
         # Enriching airbnb objects data from reverse geo search Google API
-        assign_zipcode(cleaned_airbnb_data)
+        assign_zipcode(cleaned_airbnb_data, False)
 
-    # Write cleaned rentals or airbnb data to either .txt or .json file
-    json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
-    # txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+        # Write cleaned rentals or airbnb data to either .txt or .json file
+        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
+        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+    else:
+        # Enriching airbnb objects data from reverse geo search Google API
+        assign_zipcode(cleaned_airbnb_data, False)
 
+        # Write cleaned rentals or airbnb data to either .txt or .json file
+        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
+        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+
+    # Count objects
     count_objects(cleaned_rentals_data, 'Rentals')
     count_objects(cleaned_airbnb_data, 'Airbnb')
 
+    # Handle notifications
     writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airbnb_data)
+
     return is_completed
 
 

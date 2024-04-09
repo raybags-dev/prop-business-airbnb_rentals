@@ -11,8 +11,8 @@ def main():
     is_data_ready = data_processor_pipeline()
 
     # upload data pipeline
-    if is_data_ready:
-        upload_files_to_databricks(is_data_ready)
+    # if is_data_ready:
+    #     upload_files_to_databricks(is_data_ready)
 
 
 if __name__ == "__main__":
