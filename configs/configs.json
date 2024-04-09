@@ -1,5 +1,5 @@
 {
-    "depth": 2,
+    "depth": 10,
     "source_file_csv": "../data/airbnb.csv",
     "source_file_json" : "../data/rentals.json",
     "clear_geo_cache" : false,
