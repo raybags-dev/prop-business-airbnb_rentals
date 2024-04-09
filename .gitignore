@@ -1,6 +1,6 @@
 venv/
-data/*
-src/data/data_cleaned/*
+data/
+src/data/
 
 
 *.pyc
