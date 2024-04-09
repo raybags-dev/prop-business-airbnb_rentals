@@ -1,3 +1,4 @@
+![Pipeline Overview](docs/pipeline-overview.png)
 # Proposal [ business - airbnb/rentals ]
 
 ## Overview
@@ -11,8 +12,8 @@
    - Explore data using notebooks
    - Calculate the potential average revenue per house, per postcode (rental and Airbnb)
    - Follow the principles of the [Medallion Architecture](https://www.databricks.com/glossary/medallion-architecture#:~:text=A%20medallion%20architecture%20is%20a%20data%20design%20pattern,%28from%20Bronze%20%E2%87%92%20Silver%20%E2%87%92%20Gold%20layer%20tables%29.)
-   
-## Installation and usage
+
+### Installation and usage
 To run this project, follow these steps:
 1. Clone the repository:
    git clone https://github.com/raybags-dev/prop-business-airbnb_rentals.git
@@ -22,7 +23,7 @@ To run this project, follow these steps:
 5. Install dependencies:
 
 
-## Project Structure
+### Project Structure
 
 - `/data`: Contains data files used/processed in the project.
 - `/src`: Contains source code for the project.
