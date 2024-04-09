@@ -22,6 +22,7 @@ def assign_zipcode(data, clear_cache=False):
     if clear_cache:
         zipcode_cache.clear()
         print("Cache cleared.")
+        print('Calling geo reverse search API...')
 
     worker_emulator('Fetching zipcodes...', True)
 

@@ -1,6 +1,10 @@
 import pandas as pd
-import json
 from src.middleware import error_handler
+from ochestrator.ochestrator import load_configs
+
+configs = load_configs()
+columns_to_drop_due_nan = configs['columns_to_drop_due_nan']
+unnecessary_columns_to_dropped = configs['unnecessary_columns_to_dropped']
 
 
 @error_handler.handle_error
@@ -17,10 +21,10 @@ def clean_rentals_data(data):
     # Add similar cleaning for 'deposit' and 'additionalCostsRaw' columns
 
     # Remove rows with missing values
-    cleaned_data = cleaned_data.dropna(subset=['rent', 'deposit', 'additionalCostsRaw'], how='any')
+    cleaned_data = cleaned_data.dropna(subset=columns_to_drop_due_nan, how='any')
 
     # Remove unnecessary columns
-    unnecessary_columns = ['crawlStatus', 'firstSeenAt', 'detailsCrawledAt', 'lastSeenAt', 'pageTitle']
+    unnecessary_columns = unnecessary_columns_to_dropped
     cleaned_data = cleaned_data.drop(columns=unnecessary_columns)
 
     # Remove leading and trailing whitespaces from string columns

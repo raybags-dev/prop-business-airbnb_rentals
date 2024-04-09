@@ -5,14 +5,21 @@ from typing import Union
 from src.data_pipeline import ingestion, cleaning
 from src.middleware import error_handler
 from src.utils.geoLocator import assign_zipcode
+from ochestrator.ochestrator import load_configs
 
-# Define file paths using Path objects
-rentalsJSONFilePath = Path('../data/rentals.json')
-airbnbCSVFilePath = Path('../data/airbnb.csv')
+configs = load_configs()
+source_file_csv = configs['source_file_csv']
+source_file_json = configs['source_file_json']
+clear_geo_cache = configs['clear_geo_cache']
+
+
+rentalsJSONFilePath = Path(source_file_json)
+airbnbCSVFilePath = Path(source_file_csv)
 
 
 @error_handler.handle_error
 def data_processor_pipeline() -> bool:
+    depth = configs['depth']
     # Ingest data
     rentals_data = ingestion.load_rentals_data(rentalsJSONFilePath)
     airbnb_data = ingestion.load_airbnb_data(airbnbCSVFilePath)
@@ -26,7 +33,7 @@ def data_processor_pipeline() -> bool:
     cleaned_airbnb_dict = cleaned_airbnb_data.to_dict(orient='records')
 
     # Write cleaned data to JSON files
-    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict, 10)
+    return writes_executor(cleaned_rentals_dict, cleaned_airbnb_dict, depth)
 
 
 @error_handler.handle_error
@@ -49,14 +56,14 @@ def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None
         cleaned_airbnb_data = cleaned_airbnb_data[:depth]
 
         # Enriching airbnb objects data from reverse geo search Google API
-        assign_zipcode(cleaned_airbnb_data, False)
+        assign_zipcode(cleaned_airbnb_data, clear_geo_cache)
 
         # Write cleaned rentals or airbnb data to either .txt or .json file
         json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
         txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
     else:
         # Enriching airbnb objects data from reverse geo search Google API
-        assign_zipcode(cleaned_airbnb_data, False)
+        assign_zipcode(cleaned_airbnb_data, clear_geo_cache)
 
         # Write cleaned rentals or airbnb data to either .txt or .json file
         json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
