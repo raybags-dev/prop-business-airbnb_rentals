@@ -20,7 +20,7 @@ def handle_unzip(file_path: Path, desired_extension: str) -> None:
     # Check if the desired extension already exists for the file
     target_path = folder_path / target_file_name
     if target_path.exists():
-        print(f"File with desired extension already present: {target_file_name}")
+        print(f"{target_file_name} reachable")
     else:
         worker_emulator(f'Unzipping {zip_file_path.name} in progress...', True)
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
@@ -33,3 +33,4 @@ def handle_unzip(file_path: Path, desired_extension: str) -> None:
                     os.rename(os.path.join(folder_path, file_info.filename), target_path)
                     print(f"File {zip_file_path.name} unzipped and renamed to {Path(file_info.filename).name}")
         worker_emulator(f'File: < {zip_file_path.name} > unzipped!', False)
+
