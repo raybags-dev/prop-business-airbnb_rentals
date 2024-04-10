@@ -11,6 +11,8 @@ configs = load_configs()
 source_file_csv = configs['source_file_csv']
 source_file_json = configs['source_file_json']
 clear_geo_cache = configs['clear_geo_cache']
+is_json_output = configs['is_json_output']
+is_txt_output = configs['is_txt_output']
 
 
 rentalsJSONFilePath = Path(source_file_json)
@@ -40,6 +42,12 @@ def data_processor_pipeline() -> bool:
 def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None, int] = None):
     is_completed = True
 
+    if is_json_output == False and is_txt_output == False:
+        raise Exception("Error: Invalid configurations filetype out can not be both false")
+
+    if is_json_output == True and is_txt_output == True:
+        raise Exception("Error: Invalid configurations filetype out can not be both true")
+
     # Create a new directory for cleaned data if it doesn't exist
     cleaned_data_dir = Path('data/data_cleaned')
     cleaned_data_dir.mkdir(parents=True, exist_ok=True)
@@ -59,15 +67,15 @@ def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None
         assign_zipcode(cleaned_airbnb_data, clear_geo_cache)
 
         # Write cleaned rentals or airbnb data to either .txt or .json file
-        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
-        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data, is_json_output)
+        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data, is_txt_output)
     else:
         # Enriching airbnb objects data from reverse geo search Google API
         assign_zipcode(cleaned_airbnb_data, clear_geo_cache)
 
         # Write cleaned rentals or airbnb data to either .txt or .json file
-        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data)
-        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data)
+        json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data, is_json_output)
+        txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data, is_txt_output)
 
     # Count objects
     count_objects(cleaned_rentals_data, 'Rentals')
@@ -80,33 +88,51 @@ def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None
 
 
 @error_handler.handle_error
-def json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data):
-    # Write cleaned rentals data to JSON file
-    with open(rentals_json_file_path, 'w') as json_file:
-        json.dump(cleaned_rentals_data, json_file, indent=4)
-    print("Cleaned rentals data written to JSON file:", rentals_json_file_path)
+def json_file_writer(rentals_json_file_path, cleaned_rentals_data, airbnb_json_file_path, cleaned_airbnb_data, is_json_output):
+    if is_json_output:
+        # Write cleaned rentals data to JSON file
+        with open(rentals_json_file_path, 'w') as json_file:
+            json.dump(cleaned_rentals_data, json_file, indent=4)
+        print("Cleaned rentals data written to JSON file:", rentals_json_file_path)
 
-    # Write cleaned airbnb data to .json file
-    with open(airbnb_json_file_path, 'w') as json_file:
-        json.dump(cleaned_airbnb_data, json_file, indent=4)
-    print("Cleaned airbnb data written to JSON file:", airbnb_json_file_path)
+        # Write cleaned airbnb data to .json file
+        with open(airbnb_json_file_path, 'w') as json_file:
+            json.dump(cleaned_airbnb_data, json_file, indent=4)
+        print("Cleaned airbnb data written to JSON file:", airbnb_json_file_path)
+        # remove .txt files
+        delete_files_by_extension(rentals_json_file_path, '.txt')
 
 
 @error_handler.handle_error
-def txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data):
-    # Write cleaned rentals data to .txt file
-    with open(rentals_txt_file_path, 'w') as txt_file:
-        for item in cleaned_rentals_data:
-            txt_file.write(str(item) + '\n')
+def txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file_path, cleaned_airbnb_data, is_txt_output):
+    if is_txt_output:
+        # Write cleaned rentals data to .txt file
+        with open(rentals_txt_file_path, 'w') as txt_file:
+            for item in cleaned_rentals_data:
+                txt_file.write(str(item) + '\n')
 
-    # Write cleaned airbnb data to text file
-    with open(airbnb_txt_file_path, 'w') as txt_file:
-        for item in cleaned_airbnb_data:
-            txt_file.write(str(item) + '\n')
+        # Write cleaned airbnb data to text file
+        with open(airbnb_txt_file_path, 'w') as txt_file:
+            for item in cleaned_airbnb_data:
+                txt_file.write(str(item) + '\n')
+        # remove .json files
+        delete_files_by_extension(airbnb_txt_file_path, '.json')
 
 
 def count_objects(object_list, category):
     print(f'{category} data objects written to file -> {len(object_list)}')
+
+
+def delete_files_by_extension(filepath, extension):
+    parent_directory = Path(filepath).parent
+    for file_path in parent_directory.iterdir():
+        # Check if the file has the specified extension
+        if file_path.suffix == extension:
+            try:
+                file_path.unlink()
+                print(f"File '{file_path}' deleted successfully.")
+            except OSError as e:
+                print(f"Error deleting file '{file_path}': {e}")
 
 
 # Notifications/clean/writes
