@@ -1,8 +1,10 @@
 venv/
+
 data/
 src/data/
 src/data/zipped
 
+.ipynb_checkpoints/
 
 *.pyc
 *.pyo

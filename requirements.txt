@@ -6,6 +6,7 @@ databricks-cli==0.18.0
 exceptiongroup==1.2.0
 geographiclib==2.0
 geopy==2.4.1
+git-filter-repo==2.38.0
 idna==3.6
 iniconfig==2.0.0
 numpy==1.26.4

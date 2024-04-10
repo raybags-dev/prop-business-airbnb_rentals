@@ -1,9 +1,11 @@
 {
-    "depth": 10,
+    "depth": 5,
     "source_file_csv": "../data/airbnb.csv",
     "source_file_json" : "../data/rentals.json",
     "clear_geo_cache" : false,
     "upload_to_dbfs": false,
+    "is_txt_output": false,
+    "is_json_output": true,
     "unnecessary_columns_to_dropped" : ["crawlStatus", "firstSeenAt", "detailsCrawledAt", "lastSeenAt", "pageTitle"],
     "columns_to_drop_due_nan": ["rent", "deposit", "additionalCostsRaw"]
 }
