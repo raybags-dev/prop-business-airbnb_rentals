@@ -10,10 +10,13 @@ from src.utils.unzipper import handle_unzip
 @error_handler.handle_error
 def load_rentals_data(file_path: Path) -> List[Dict[str, Any]]:
     worker_emulator('Loading rental data initiated...', True)
+
     handle_unzip(file_path, '.json')
     """Load data from rentals.json"""
-    if not isinstance(file_path, Path):  # Check if file_path is a Path object
-        raise TypeError('Invalid filepath input')
+    err_message = 'Invalid filepath input'
+
+    if not isinstance(file_path, Path):
+        raise TypeError(err_message)
     with open(file_path, 'r') as f:
         data = json.load(f)
     mapped_data = map_ids(data)
@@ -23,11 +26,13 @@ def load_rentals_data(file_path: Path) -> List[Dict[str, Any]]:
 
 @error_handler.handle_error
 def load_airbnb_data(file_path: Path) -> pd.DataFrame:
+    msg = 'Loading airbnb data initiated...'
     """Load data from airbnb.csv"""
-    worker_emulator('Loading airbnb data initiated...', True)
+    worker_emulator(msg, True)
     handle_unzip(file_path, '.csv')
     if not isinstance(file_path, Path):
-        raise TypeError('Invalid filepath input')
+        err_msg = 'Invalid filepath input'
+        raise TypeError(err_msg)
     worker_emulator('Done', False)
     return pd.read_csv(file_path)
 

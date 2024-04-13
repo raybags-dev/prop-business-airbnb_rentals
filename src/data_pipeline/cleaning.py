@@ -1,8 +1,10 @@
 import pandas as pd
 from src.middleware import error_handler
 from ochestrator.ochestrator import load_configs
+from logger.logger import initialize_logging, my_log
 
 configs = load_configs()
+
 columns_to_drop_due_nan = configs['columns_to_drop_due_nan']
 unnecessary_columns_to_dropped = configs['unnecessary_columns_to_dropped']
 
@@ -76,5 +78,4 @@ def preprocess_data(data):
                 data[col] = data[col].str.replace('\t', '', regex=False)
                 data[col] = data[col].str.strip()
 
-    print("Preprocessing completed successfully.")
     return data
