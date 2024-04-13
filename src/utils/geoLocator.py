@@ -1,6 +1,8 @@
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
 from geopy.geocoders import Nominatim
+from logger.logger import initialize_logging, my_log
+
 
 # Initialize geocoder with a custom user agent (optional)
 geolocator = Nominatim(user_agent="my_custom_user_agent")
@@ -21,8 +23,7 @@ def assign_zipcode(data, clear_cache=False):
     # Clear the cache if requested
     if clear_cache:
         zipcode_cache.clear()
-        print("Cache cleared.")
-        print('Calling geo reverse search API...')
+        print(f"Cache cleared...done! - Calling geo reverse search API...")
 
     worker_emulator('Fetching zipcodes...', True)
 

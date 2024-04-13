@@ -3,6 +3,7 @@ import zipfile
 from pathlib import Path
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
+from logger.logger import initialize_logging, my_log
 
 
 @error_handler.handle_error
@@ -15,7 +16,6 @@ def handle_unzip(file_path: Path, desired_extension: str) -> None:
     zip_file_path = folder_path / (file_name + '.zip')
     if not zip_file_path.exists():
         print(f"No corresponding .zip file found for {file_path.name}.")
-        return
 
     # Check if the desired extension already exists for the file
     target_path = folder_path / target_file_name

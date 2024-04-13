@@ -1,20 +1,41 @@
 import json
 import sys
 from pathlib import Path
+from logger.logger import initialize_logging, my_log
 
 
 def load_configs():
     try:
         config_file_path = Path('../configs/configs.json')
 
-        # Check if the file exists and is not empty
         if not config_file_path.exists() or config_file_path.stat().st_size == 0:
-            raise Exception(f"> Error: true\n> Source: The configuration file '{config_file_path}'\n> Message: File does "
-                            f"not exist Or is empty.")
+            msg = f"> Error: true\n> Source: The configuration file '{config_file_path}'\n> Message: File does not exist Or is empty"
+            raise Exception(msg)
 
-        # Load JSON configuration file
         with open(config_file_path, 'r') as file:
             configs = json.load(file)
+
+        if 'depth' not in configs or (configs['depth'] is not None and (not isinstance(configs['depth'], int) or configs['depth'] < 1)):
+            msg = "> Error: 'depth' should be a positive integer greater than or equal to 1, or None."
+            raise ValueError(msg)
+
+        if 'source_file_csv' not in configs or 'source_file_json' not in configs:
+            msg = "> Error: 'source_file_csv' and 'source_file_json' are required."
+            raise ValueError(msg)
+
+        fields_to_check = ['clear_geo_cache', 'upload_to_dbfs', 'is_txt_output', 'is_json_output']
+        missing_fields = [field for field in fields_to_check if field not in configs]
+        if missing_fields:
+            for field in missing_fields:
+                raise ValueError(f"> Error: Required fields ({field}) are missing in configurations.")
+
+        if not all(isinstance(configs[key], bool) for key in fields_to_check):
+            msg = "> Error: 'clear_geo_cache', 'upload_to_dbfs', 'is_txt_output', and 'is_json_output' should be boolean values."
+            raise ValueError(msg)
+
+        if not isinstance(configs['unnecessary_columns_to_dropped'], list) or not isinstance(configs['columns_to_drop_due_nan'], list):
+            msg = "> Error: 'unnecessary_columns_to_dropped' and 'columns_to_drop_due_nan' should be lists."
+            raise ValueError(msg)
 
         # Parse values from the loaded JSON
         depth = int(configs.get('depth', 'None')) if configs.get('depth') != 'None' else None
@@ -40,5 +61,6 @@ def load_configs():
         }
 
     except Exception as e:
-        print(f'{e}')
+        # print(f'Error: {e}')
+        my_log(f"{e}", 'info')
         sys.exit()

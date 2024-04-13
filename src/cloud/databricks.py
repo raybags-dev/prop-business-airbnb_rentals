@@ -5,6 +5,7 @@ from colorama import init
 from dotenv import load_dotenv
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
+from logger.logger import initialize_logging, my_log
 
 
 init()
