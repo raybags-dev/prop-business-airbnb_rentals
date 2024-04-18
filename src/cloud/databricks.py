@@ -1,11 +1,12 @@
 import os
+import warnings
 import subprocess
 from pathlib import Path
 from colorama import init
 from dotenv import load_dotenv
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
-from logger.logger import initialize_logging, my_log
+from urllib3.exceptions import NotOpenSSLWarning
 
 
 init()
@@ -14,6 +15,8 @@ load_dotenv()
 
 @error_handler.handle_error
 def upload_files_to_databricks(is_data_ready: bool) -> None:
+    warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
+
     if not is_data_ready:
         print("> Data is not ready. Skipping upload to Databricks.")
         return

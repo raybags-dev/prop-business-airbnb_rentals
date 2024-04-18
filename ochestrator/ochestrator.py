@@ -1,9 +1,12 @@
 import json
-import sys
 from pathlib import Path
-from logger.logger import my_log
+from logger.logger import initialize_logging, my_log
+from src.middleware import error_handler
+
+initialize_logging()
 
 
+@error_handler.handle_error
 def load_configs():
     try:
         config_file_path = Path('../configs/configs.json')
@@ -61,7 +64,6 @@ def load_configs():
         is_json_output = configs.get('is_json_output', False)
         unnecessary_columns_to_dropped = configs.get('unnecessary_columns_to_dropped', [])
         columns_to_drop_due_nan = configs.get('columns_to_drop_due_nan', [])
-
         return {
             'depth': depth,
             'source_file_csv': source_file_csv,
@@ -75,6 +77,6 @@ def load_configs():
         }
 
     except Exception as e:
-        my_log(f"{e}", 'info')
+        my_log(f"{e}", 'error')
         return None
 
