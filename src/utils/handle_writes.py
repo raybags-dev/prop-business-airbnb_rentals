@@ -1,5 +1,4 @@
 import os
-import math
 import json
 from pathlib import Path
 from typing import Union
@@ -10,6 +9,7 @@ from ochestrator.ochestrator import load_configs
 from logger.logger import initialize_logging, my_log
 
 configs = load_configs()
+initialize_logging()
 
 source_file_csv = configs['source_file_csv']
 source_file_json = configs['source_file_json']
@@ -48,8 +48,7 @@ def writes_executor(cleaned_rentals_data, cleaned_airbnb_data, depth: Union[None
         depth = None
 
     if is_json_output == is_txt_output:
-        msg = "Error: Invalid configurations - filetype output can not be both true or both false"
-        print(msg)
+        msg = "filetype output can not be both true and false"
         raise Exception(msg)
 
     # Create a new directory for cleaned data if it doesn't exist
@@ -123,6 +122,7 @@ def txt_file_writer(rentals_txt_file_path, cleaned_rentals_data, airbnb_txt_file
         delete_files_by_extension(airbnb_txt_file_path, '.json')
 
 
+@error_handler.handle_error
 def delete_files_by_extension(filepath, extension):
     parent_directory = Path(filepath).parent
     for file_path in parent_directory.iterdir():
@@ -135,7 +135,6 @@ def delete_files_by_extension(filepath, extension):
                 print(f"Error deleting file '{file_path}': {e}")
 
 
-# Notifications/clean/writes
 @error_handler.handle_error
 def writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airbnb_data) -> dict:
     if is_completed:

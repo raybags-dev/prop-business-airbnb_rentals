@@ -1,7 +1,6 @@
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
 from geopy.geocoders import Nominatim
-from logger.logger import initialize_logging, my_log
 
 
 # Initialize geocoder with a custom user agent (optional)
