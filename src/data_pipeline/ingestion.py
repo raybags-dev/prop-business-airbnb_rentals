@@ -20,7 +20,7 @@ def load_rentals_data(file_path: Path) -> List[Dict[str, Any]]:
     with open(file_path, 'r') as f:
         data = json.load(f)
     mapped_data = map_ids(data)
-    worker_emulator('Process Completed: ', False)
+    worker_emulator('Loading rental data Completed: ', False)
     return mapped_data
 
 
