@@ -1,9 +1,7 @@
 from src.utils.handle_writes import data_processor_pipeline
 from src.middleware import error_handler
-from src.middleware.warnings import suppress_warnings
 from ochestrator.ochestrator import load_configs
 from src.cloud.databricks import upload_files_to_databricks
-
 from logger.logger import initialize_logging, my_log
 
 initialize_logging()
@@ -11,7 +9,6 @@ configs = load_configs()
 
 
 @error_handler.handle_error
-@suppress_warnings
 def main():
     # data processor pipeline
     is_data_ready = data_processor_pipeline()

@@ -1,7 +1,7 @@
 import json
 import sys
 from pathlib import Path
-from logger.logger import initialize_logging, my_log
+from logger.logger import my_log
 
 
 def load_configs():
@@ -15,9 +15,22 @@ def load_configs():
         with open(config_file_path, 'r') as file:
             configs = json.load(file)
 
-        if 'depth' not in configs or (configs['depth'] is not None and (not isinstance(configs['depth'], int) or configs['depth'] < 1)):
-            msg = "> Error: 'depth' should be a positive integer greater than or equal to 1, or None."
+        if 'depth' not in configs:
+            msg = "> Error: Invalid configurations, 'depth' is a required parameter!"
             raise ValueError(msg)
+
+        depth = configs['depth']
+
+        if depth == '':
+            msg = "> Error: Invalid configurations, 'depth' cannot be an empty string"
+            raise ValueError(msg)
+
+        if depth != 'None':
+            if int(depth) <= 0:
+                msg = "> Error: Invalid configurations, 'depth' value cannot be '0' or a negative number!"
+                raise ValueError(msg)
+            else:
+                pass
 
         if 'source_file_csv' not in configs or 'source_file_json' not in configs:
             msg = "> Error: 'source_file_csv' and 'source_file_json' are required."
@@ -33,7 +46,8 @@ def load_configs():
             msg = "> Error: 'clear_geo_cache', 'upload_to_dbfs', 'is_txt_output', and 'is_json_output' should be boolean values."
             raise ValueError(msg)
 
-        if not isinstance(configs['unnecessary_columns_to_dropped'], list) or not isinstance(configs['columns_to_drop_due_nan'], list):
+        if not isinstance(configs['unnecessary_columns_to_dropped'], list) or not isinstance(
+                configs['columns_to_drop_due_nan'], list):
             msg = "> Error: 'unnecessary_columns_to_dropped' and 'columns_to_drop_due_nan' should be lists."
             raise ValueError(msg)
 
@@ -61,6 +75,6 @@ def load_configs():
         }
 
     except Exception as e:
-        # print(f'Error: {e}')
         my_log(f"{e}", 'info')
-        sys.exit()
+        return None
+

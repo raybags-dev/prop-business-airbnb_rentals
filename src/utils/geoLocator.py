@@ -52,7 +52,7 @@ def assign_zipcode(data, clear_cache=False):
 
                 # Append other fields from the API call to the object
                 for key, value in location.raw['address'].items():
-                    if key != 'postcode':
+                    if key != 'postcode' and key != 'gender':
                         obj[key] = value
             else:
                 print(f"Failed to fetch zipcode for ({obj['latitude']}, {obj['longitude']})")

@@ -25,7 +25,7 @@ class LoadingEmulator:
                 self.loading_thread.join()
 
         if not start_loading:
-            print('\033[92m\n> Process completed. \033[92m ✔️✔️')
+            print('\033[92m\n> Current process completed. \033[92m ✔️✔️')
 
     def update_progress(self):
         with tqdm(total=100, bar_format=f'> \033[96m{{percentage:.0f}}% - (\033[96m{{elapsed}}/{{remaining}})', ncols=100) as pbar:

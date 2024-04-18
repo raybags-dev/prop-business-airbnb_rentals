@@ -1,0 +1,1 @@
+{"depth": 3, "source_file_csv": "file.csv", "source_file_json": "file.json", "clear_geo_cache": true, "upload_to_dbfs": false, "is_txt_output": false, "is_json_output": true, "unnecessary_columns_to_dropped": ["col1", "col2"], "columns_to_drop_due_nan": ["col3", "col4"]}

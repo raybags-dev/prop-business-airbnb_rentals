@@ -1,6 +1,5 @@
 venv/
 
-data/
 data/*.csv
 data/*.zip
 data/*.json
@@ -12,7 +11,6 @@ src/data/data_cleaned/*.txt
 
 .ipynb_checkpoints/
 
-*.pyc
 *.pyo
 __pycache__/
 
