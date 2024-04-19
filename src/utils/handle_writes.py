@@ -150,10 +150,9 @@ def writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airb
         message = {
             "status": "completed",
             "isDataCleaned": True,
-            "fileCount": f'{file_count}',
             "rentals_object_count": rentals_object_count,
             "airbnb_object_count": airbnb_object_count,
-            "message": f"All files processed, data has been stored in {file_count} files in {data_dir_path}"
+            "message": f"All files processed, data has been stored in {data_dir_path}"
         }
         formatted_message = json.dumps(message, indent=4)
         print(formatted_message)
@@ -162,7 +161,6 @@ def writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airb
         message = {
             "status": "incomplete",
             "isDataCleaned": False,
-            "fileCount": "Unknown",
             "rentals_object_count": "Unknown",
             "airbnb_object_count": "Unknown",
             "message": "Data processing was not completed successfully."
