@@ -1,4 +1,4 @@
-![Pipeline Overview](docs/pipeline-overview.png)
+![Pipeline Overview](docs/pipeline_flow_chat.png)
 # Proposal [ business - airbnb/rentals ]
 
 ## Overview
