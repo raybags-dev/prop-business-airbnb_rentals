@@ -3,7 +3,6 @@ import zipfile
 from pathlib import Path
 from src.middleware import error_handler
 from src.utils.loader import worker_emulator
-from logger.logger import initialize_logging, my_log
 
 
 @error_handler.handle_error

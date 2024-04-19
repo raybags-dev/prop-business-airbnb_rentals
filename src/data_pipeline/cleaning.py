@@ -1,7 +1,6 @@
 import pandas as pd
 from src.middleware import error_handler
 from ochestrator.ochestrator import load_configs
-from logger.logger import initialize_logging, my_log
 
 configs = load_configs()
 
