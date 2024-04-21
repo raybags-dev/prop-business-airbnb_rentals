@@ -163,7 +163,7 @@ def writes_notification_handler(is_completed, cleaned_rentals_data, cleaned_airb
             "isDataCleaned": False,
             "rentals_object_count": "Unknown",
             "airbnb_object_count": "Unknown",
-            "message": "Data processing was not completed successfully."
+            "message": "Failed. Data processing was not completed."
         }
         formatted_message = json.dumps(message, indent=4)
         print(formatted_message)
